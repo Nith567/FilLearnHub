@@ -5,10 +5,11 @@ import { useState } from 'react';
 import lighthouse from "@lighthouse-web3/sdk"
 import { useWallet } from '@/context/walletcontext';
 import { ethers } from 'ethers';
-
+import { purchaseContract } from '@/utils/contract';
+import { deployContract } from '@/utils/contract';
 function page() {
-    // const iframeCode = '<iframe width="560" height="315" src="//ok.ru/videoembed/7460795189999" frameborder="0" allow="autoplay" allowfullscreen></iframe>';
     const [file, setFile] = useState(null)
+    const [contract, setContract] = useState('')
 
   const [fileURL, setFileURL] = useState(null)
 
@@ -94,7 +95,7 @@ console.log('p ',walletAddress.walletAddress)
             chain: "Calibration",
             standardContractType: "Custom",
             method: "isActive",
-            contractAddress: '0x9093638b20Ce78e4d93Bfed3814f2403776FcCE5',//we need to get the contract fromthe owner once deploys it
+            contractAddress: '0x9093638b20Ce78e4d93Bfed3814f2403776FcCE5',//we need to get the contract from the owner once deploys it
             returnValueTest: {
                 comparator: "==",
                 value: "1"
@@ -124,7 +125,15 @@ console.log('p ',walletAddress.walletAddress)
   }
 
 
-
+const deploy=async()=>{
+  let contract;
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const priceWei = ethers.utils.parseEther("0.2").toString();
+  contract = await deployContract(signer, "QmR5GquwoNgf77Jen5p1ArMa3GqpdTBVzrHrxvY2SzMWRC", '2000000000000000000');
+  setContract(contract.address);
+  console.log(contract.address, ' hi ', contract)
+}
 
   const uploadEncryptedFile = async () => {
     if (!file) {
@@ -182,7 +191,8 @@ console.log('p ',walletAddress.walletAddress)
       }
       </div>
  <div>
- <button onClick={()=>accessControl()}>Accesscontrol</button>
+ {/* <button onClick={()=>accessControl()}>Accesscontrol</button> */}
+ <button onClick={()=>deploy()}>deploy</button>
  </div>
     </div>
   )
