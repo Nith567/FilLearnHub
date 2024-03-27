@@ -75,9 +75,9 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link href="/profile" className="flex flex-col items-center">
+                        <Link href="/create" className="flex flex-col items-center">
                             <CgProfile className="text-2xl" />
-                            <span>Profile</span>
+                            <span>Create</span>
                         </Link>
                     </li>
                     <li>

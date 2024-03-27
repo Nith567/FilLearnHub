@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import { useWallet } from '@/app/context/walletcontext';
+import { useWallet } from '@/context/walletcontext';
 
 const ConnectWallet = ({ onWalletConnect }) => {
   const { updateWalletAddress, walletAddress } = useWallet();

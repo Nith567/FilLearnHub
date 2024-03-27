@@ -1,9 +1,7 @@
 import './globals.css'
-import { WalletProvider } from './context/walletcontext'
+import { WalletProvider } from '../context/walletcontext'
 import Head from 'next/head'
-
-
-
+import Navbar from '@/components/navbar'
 export default function RootLayout({ children }) {
 
   return (
@@ -22,8 +20,8 @@ export default function RootLayout({ children }) {
         />
       </Head>
     </div>
-
             <WalletProvider>
+              <Navbar/>
                {children}   
                </WalletProvider>   
       

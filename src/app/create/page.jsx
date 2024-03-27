@@ -7,6 +7,9 @@ import { useWallet } from '@/context/walletcontext';
 import { ethers } from 'ethers';
 import { purchaseContract } from '@/utils/contract';
 import { deployContract } from '@/utils/contract';
+import { signAuthMessages } from './fileContract';
+import { uploadEncryptedFiles } from './fileContract';
+
 function page() {
     const [file, setFile] = useState(null)
     const [contract, setContract] = useState('')
@@ -19,7 +22,7 @@ function page() {
   const signAuthMessage = async () => {
     if (window.ethereum) {
       try {
-console.log('p ',walletAddress.walletAddress)
+       console.log('p ',walletAddress.walletAddress)
         const signerAddress = String(walletAddress.walletAddress);
         console.log("so ",signerAddress)
         const { message } = (await lighthouse.getAuthMessage(signerAddress)).data
@@ -86,7 +89,7 @@ console.log('p ',walletAddress.walletAddress)
     }
   };
   
-  const accessControl = async () => {
+const accessControl = async () => {
     try {
       const cid = "QmR5GquwoNgf77Jen5p1ArMa3GqpdTBVzrHrxvY2SzMWRC"
       const conditions = [
@@ -106,8 +109,7 @@ console.log('p ',walletAddress.walletAddress)
         },
     ];
       const aggregator = "([1])"
-  
-      // const signedMessage = await signAuthMessage()
+
       const { publicKey, signedMessage } = await encryptionSignature();
 
       const response = await lighthouse.applyAccessCondition(
@@ -124,15 +126,23 @@ console.log('p ',walletAddress.walletAddress)
     }
   }
 
+const uploads=async()=>{
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const outputHash=await uploadEncryptedFiles(file);
+  const priceWei = ethers.utils.parseEther("0.2").toString();
+  let contract=  await deployContract(signer, outputHash,priceWei);
+  console.log(contract.address)
+}
 
 const deploy=async()=>{
   let contract;
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const priceWei = ethers.utils.parseEther("0.2").toString();
-  contract = await deployContract(signer, "QmR5GquwoNgf77Jen5p1ArMa3GqpdTBVzrHrxvY2SzMWRC", '2000000000000000000');
+  contract = await deployContract(signer, "QmR5GquwoNgf77Jen5p1ArMa3GqpdTBVzrHrxvY2SzMWRC", priceWei);
   setContract(contract.address);
-  console.log(contract.address, ' hi ', contract)
+  console.log(contract.address)
 }
 
   const uploadEncryptedFile = async () => {
@@ -150,18 +160,14 @@ const deploy=async()=>{
 
       const {publicKey, signedMessage} = await encryptionSignature();
 
-      // Upload file with encryption
       const output = await lighthouse.uploadEncrypted(
         file,
-        apiKey,
+       apiKey,
         publicKey,
         signedMessage,
         progressCallback
       )
-      console.log("Encrypted File Status:", output)
-      console.log(
-        `Decrypt at https://decrypt.mesh3.network/evm/${output.data[0].Hash}`
-      )
+      console.log("Encrypted File Status:", output.data[0].Hash)
     } catch (error) {
       console.error("Error uploading encrypted file:", error)
     }
@@ -177,9 +183,12 @@ const deploy=async()=>{
   return (
     <div className="App">
       <input type="file" onChange={handleFileChange} />
+
       <button onClick={uploadEncryptedFile} disabled={!file}>
         UploadEncrypt
       </button>
+
+      <button onClick={uploads}>UPLOADFUNC</button>
       <div>
 
       <button onClick={()=>decrypt()}>decrypt</button>
@@ -187,7 +196,7 @@ const deploy=async()=>{
         fileURL?
           <a href={fileURL} target="_blank">viewFile</a>
         :
-          <div className='m-2'>not avaible bro</div>
+          <div className='m-2'>not available</div>
       }
       </div>
  <div>
