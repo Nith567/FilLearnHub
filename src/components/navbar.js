@@ -82,7 +82,7 @@ const Navbar = () => {
                     <li>
                         <Link href="/create" className="flex flex-col items-center">
                             <GiTeacher className='text-3xl' />
-                            <span>Teach on FLB</span>
+                            <span>Upload on FHB</span>
                         </Link>
                     </li>
                     <li>
@@ -100,7 +100,7 @@ const Navbar = () => {
                         <PiHandCoinsDuotone className='text-2xl mr-2' /> Courses
                     </Link>
                     <Link href="/create" className="flex items-center">
-                        <HiOutlineBuildingLibrary className='text-2xl mr-2' /> Teach on FLB
+                        <HiOutlineBuildingLibrary className='text-2xl mr-2' /> Upload on FHB
                     </Link>
                     {ready && !authenticated && (
       <button disabled={disableLogin} onClick={login}>
