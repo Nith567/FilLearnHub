@@ -1,14 +1,16 @@
 import './globals.css'
-import { WalletProvider } from '../context/walletcontext'
 import Head from 'next/head'
 import Navbar from '@/components/navbar'
+import Providerss from './provider'
+
 export default function RootLayout({ children }) {
 
   return (
-    <>
     <html lang="en">
     <head />
+
   <body>
+  <Providerss>
     <div>
     <Head>
         <title>LEARN HUB FILECOIN</title>
@@ -20,13 +22,13 @@ export default function RootLayout({ children }) {
         />
       </Head>
     </div>
-            <WalletProvider>
+ 
               <Navbar/>
                {children}   
-               </WalletProvider>   
-      
+
+               </Providerss>
       </body>
     </html>
-    </>
+
   )
 }

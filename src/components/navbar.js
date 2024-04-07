@@ -1,19 +1,18 @@
 "use client"
-// components/Navbar.js
 import { useState } from 'react';
 import Link from 'next/link';
-import ConnectWallet from './connectwallet';
 import { AiOutlineHome } from 'react-icons/ai'
 import { CgProfile } from 'react-icons/cg'
 import { PiHandCoinsDuotone } from 'react-icons/pi'
 import { HiOutlineBuildingLibrary } from 'react-icons/hi2'
 import { SiSololearn } from "react-icons/si";
 import { GiTeacher } from "react-icons/gi";
-
+import {usePrivy} from '@privy-io/react-auth';
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isWalletConnected, setWalletConnected] = useState(false);
-
+    const {ready, authenticated, login,user} = usePrivy();
+    const disableLogin = !ready || (ready && authenticated);
     const handleWalletConnect = (status) => {
         setWalletConnected(status);
     };
@@ -81,19 +80,19 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link href="/earn" className="flex flex-col items-center">
+                        <Link href="/lists" className="flex flex-col items-center">
                             <PiHandCoinsDuotone className='text-2xl' />
                             <span>Courses</span>
                         </Link>
                     </li>
                     <li>
-                        <Link href="/governance" className="flex flex-col items-center">
+                        <Link href="/" className="flex flex-col items-center">
                             <GiTeacher className='text-3xl' />
                             <span>Teach on FLB</span>
                         </Link>
                     </li>
                     <li>
-                        <ConnectWallet onWalletConnect={handleWalletConnect} />
+                    {user?.wallet?.address}
                     </li>
 
                 </ul>
@@ -109,10 +108,17 @@ const Navbar = () => {
                     <Link href="/earn" className="flex items-center">
                         <PiHandCoinsDuotone className='text-2xl mr-2' /> Courses
                     </Link>
-                    <Link href="/Governance" className="flex items-center">
+                    <Link href="/create" className="flex items-center">
                         <HiOutlineBuildingLibrary className='text-2xl mr-2' /> Teach on FLB
                     </Link>
-                    <ConnectWallet onWalletConnect={handleWalletConnect} />
+                    {ready && !authenticated && (
+      <button disabled={disableLogin} onClick={login}>
+        Log in
+      </button>
+    )}
+                   <div className='text-2xl '>
+                   {user?.wallet?.address}
+                   </div>
                 </div>
             )}
         </nav>

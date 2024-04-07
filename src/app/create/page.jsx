@@ -1,104 +1,88 @@
 'use client'
 import React from 'react'
-import ReactHtmlParser from 'react-html-parser';
-import { useState } from 'react';
-import lighthouse from "@lighthouse-web3/sdk"
-import { useWallet } from '@/context/walletcontext';
+import { Database } from "@tableland/sdk";
+import { useState,useCallback } from 'react';
+import lighthouse, { upload } from "@lighthouse-web3/sdk"
+import {usePrivy} from '@privy-io/react-auth';
+import {useWallets} from '@privy-io/react-auth';
 import { ethers } from 'ethers';
-import { purchaseContract } from '@/utils/contract';
 import { deployContract } from '@/utils/contract';
-import { signAuthMessages } from './fileContract';
-import { uploadEncryptedFiles } from './fileContract';
+import { Registry } from "@tableland/sdk";
 
 function page() {
+  const {wallets} = useWallets();
     const [file, setFile] = useState(null)
-    const [contract, setContract] = useState('')
-
-  const [fileURL, setFileURL] = useState(null)
-
+    const [contracts, setContract] = useState('')
+    const [title, setTitle] = useState('');
+    const [metadata, setMetadata] = useState('');
+    const [outputHash, setoutputHash] = useState('');
+    const [price, setPrice] = useState('');
+    const [fileURL, setFileURL] = useState(null)
     const apiKey = 'e504cd89.d619030881094014b1733dda637c4603'
-    const walletAddress=useWallet();
+    const {ready, authenticated, login,user,signMessage} = usePrivy();
 
-  const signAuthMessage = async () => {
-    if (window.ethereum) {
+    const progressCallback = (progressData) => {
+      let percentageDone =
+        100 - (progressData?.total / progressData?.uploaded)?.toFixed(2)
+      console.log(percentageDone)
+    }
+    const disableLogin = !ready || (ready && authenticated);
+    const initializeSigner=useCallback(async()=> {
+      const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
+      if (!embeddedWallet) {
+        console.error('Embedded wallet not found');
+        return null;
+      }
+      console.log(embeddedWallet.chainId);
+
+      await embeddedWallet.switchChain(314159);
+      const providers = await embeddedWallet.getEthersProvider();
+      return providers.getSigner();
+    },[wallets])
+    
+
+ const signAuthMessages = async () => {
+
+   const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
       try {
-       console.log('p ',walletAddress.walletAddress)
-        const signerAddress = String(walletAddress.walletAddress);
-        console.log("so ",signerAddress)
-        const { message } = (await lighthouse.getAuthMessage(signerAddress)).data
-        const signature = await window.ethereum.request({
-          method: "personal_sign",
-          params: [message, signerAddress],
+        if (!embeddedWallet) {
+          console.error('Embedded wallet not found');
+          return null;
+        }
+        else{
+        await embeddedWallet.switchChain(314159);
+        const providers = await embeddedWallet.getEthersProvider();
+         const signerAddressS= providers.getSigner();
+         const signerAddress=await  signerAddressS.getAddress(); 
+        const {message}  = (await lighthouse.getAuthMessage(signerAddress)).data
+        console.log(message);
+
+        // const accounts = await wallet.provider.request({
+        //   method: 'eth_requestAccounts',
+        // });
+        const signatures = await signMessage(message)
+        return ({
+          publicKey:signerAddress,
+          signMessage:signatures
         })
-        return { signature, signerAddress }
-      } catch (error) {
+      } 
+    }
+      catch (error) {
         console.error("Error signing message with Wallet", error)
         return null
       }
-    } else {
-      console.log("Please install Wallet!")
-      return null
-    }
+
   }
-
-  const progressCallback = (progressData) => {
-    let percentageDone =
-      100 - (progressData?.total / progressData?.uploaded)?.toFixed(2)
-    console.log(percentageDone)
-  }
-
-  const encryptionSignature = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const address = await signer.getAddress();
-    const signerAddress = String(walletAddress.walletAddress);
-    const messageRequested = (await lighthouse.getAuthMessage(address)).data
-      .message;
-    const signedMessage = await signer.signMessage(messageRequested);
-    return {
-      signedMessage: signedMessage,
-      publicKey: address
-    };
-  };
-
-  const decrypt = async () => {
+   const accessControls = async (cid,contractAddress) => {
     try {
-      const cid = "QmWU6WqYHQKwzoh2VskyswPGLPCTWDhsakMgtn8jK46rDd";
-      const { publicKey, signedMessage } = await encryptionSignature();
-      const keyObject = await lighthouse.fetchEncryptionKey(
-        cid,
-        publicKey,
-        signedMessage
-      );
-  
-      const fileType = "image/jpeg";
-      const decrypted = await lighthouse.decryptFile(
-        cid,
-        keyObject.data.key,
-        fileType
-      );
-      
-      console.log('decrypt bro', decrypted);
-      
-      const url = URL.createObjectURL(decrypted);
-      console.log(url);
-      
-      setFileURL(url);
-    } catch (error) {
-      console.error('Error during decryption:', error);
-    }
-  };
-  
-const accessControl = async () => {
-    try {
-      const cid = "QmR5GquwoNgf77Jen5p1ArMa3GqpdTBVzrHrxvY2SzMWRC"
+    //   const cid = "QmR5GquwoNgf77Jen5p1ArMa3GqpdTBVzrHrxvY2SzMWRC"
       const conditions = [
         {
-            id: 1,
+            id: 314159,
             chain: "Calibration",
             standardContractType: "Custom",
             method: "isActive",
-            contractAddress: '0x9093638b20Ce78e4d93Bfed3814f2403776FcCE5',//we need to get the contract from the owner once deploys it
+            contractAddress: contractAddress,//'0x9093638b20Ce78e4d93Bfed3814f2403776FcCE5',//we need to get the contract from the owner once deploys it
             returnValueTest: {
                 comparator: "==",
                 value: "1"
@@ -110,68 +94,114 @@ const accessControl = async () => {
     ];
       const aggregator = "([1])"
 
-      const { publicKey, signedMessage } = await encryptionSignature();
+      const { publicKey, signMessage } = await signAuthMessages();
 
       const response = await lighthouse.applyAccessCondition(
         publicKey,
         cid,
-        signedMessage,
+        signMessage,
         conditions,
         aggregator
       )
-  
       console.log(response)
     } catch (error) {
       console.log(error)
     }
   }
-
-const uploads=async()=>{
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-  const outputHash=await uploadEncryptedFiles(file);
-  const priceWei = ethers.utils.parseEther("0.2").toString();
-  let contract=  await deployContract(signer, outputHash,priceWei);
-  console.log(contract.address)
-}
-
-const deploy=async()=>{
-  let contract;
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-  const priceWei = ethers.utils.parseEther("0.2").toString();
-  contract = await deployContract(signer, "QmR5GquwoNgf77Jen5p1ArMa3GqpdTBVzrHrxvY2SzMWRC", priceWei);
-  setContract(contract.address);
-  console.log(contract.address)
-}
-
-  const uploadEncryptedFile = async () => {
-    if (!file) {
-      console.error("No file selected.")
-      return
-    }
-
-    try {
-      const encryptionAuth = await signAuthMessage()
-      if (!encryptionAuth) {
-        console.error("Failed to sign the message.")
+  
+    const uploadEncryptedFile = async () => {
+      if (!file) {
+        console.error("No file selected.")
         return
       }
-
-      const {publicKey, signedMessage} = await encryptionSignature();
-
-      const output = await lighthouse.uploadEncrypted(
-        file,
-       apiKey,
-        publicKey,
-        signedMessage,
-        progressCallback
-      )
-      console.log("Encrypted File Status:", output.data[0].Hash)
-    } catch (error) {
-      console.error("Error uploading encrypted file:", error)
+      try {
+        const {publicKey, signMessage} = await signAuthMessages();
+        const output = await lighthouse.uploadEncrypted(
+          file,
+         apiKey,
+          publicKey,
+          signMessage,
+          progressCallback
+        )
+       console.log("Encrypted File Status:", output.data[0].Hash)
+       setoutputHash( output.data[0].Hash)
+      } catch (error) {
+        console.error("Error uploading encrypted file:", error)
+      }
     }
+
+  // const decrypt = async (cid) => {
+  //   try {
+  //     const cid = "QmWU6WqYHQKwzoh2VskyswPGLPCTWDhsakMgtn8jK46rDd";//cid
+  //     const { publicKey, signedMessage } = await encryptionSignatures();
+  //     const keyObject = await lighthouse.fetchEncryptionKey(
+  //       cid,
+  //       publicKey,
+  //       signedMessage
+  //     );
+  
+  //     const fileType = "image/jpeg";
+  //     const decrypted = await lighthouse.decryptFile(
+  //       cid,
+  //       keyObject.data.key,
+  //       fileType
+  //     );
+      
+  //     console.log('decrypt bro', decrypted);
+      
+  //     const url = URL.createObjectURL(decrypted);
+  //     console.log(url);
+      
+  //     setFileURL(url);
+  //   } catch (error) {
+  //     console.error('Error during decryption:', error);
+  //   }
+  // }
+
+  const uploadOnce=async()=>{
+    const signer=await initializeSigner();
+    const db = new Database({ signer });
+    const prefix = "demolearn";
+    const { meta: create } = await 
+   db.prepare(`CREATE TABLE ${prefix} (id integer primary key,contract text, title text, metadata text,price int,owner text,cid text);`)
+       .run();
+    
+    await create.txn?.wait();
+    let tableNams = create.txn?.names[0]
+    console.log(tableNams)
   }
+
+const sets=async(e)=>{
+  const signer=await initializeSigner();
+  const registry = new Registry({ signer });
+  const tx = await registry.setController({
+    tableName: "demolearn_314159_829",
+    controller: "0x778b93fdfbce56f43cfcd5b1856b5f2ab28de962",
+  });
+}
+
+const uploadData=async(e)=>{
+  e.preventDefault();
+
+      const signer=await initializeSigner();
+      const db = new Database({ signer });
+  const owner=await signer.getAddress();
+  console.log(" so here , ", owner)
+
+  const priceWei = ethers.utils.parseEther(price).toString();
+  // let contract= await deployContract(signer, outputHash,priceWei);
+  let contract= await deployContract(signer, outputHash,priceWei);
+  setContract(contract.address);
+  console.log(contract.address)
+
+  const { meta: insert } = await db.prepare(`INSERT INTO demolearn_314159_829 (contract,title,metadata, price, owner, cid) VALUES (?, ?, ?, ?, ?, ?)`).bind(`${contract.address}`,title,metadata,price,owner,outputHash)
+  .run();
+let ct= await insert.txn?.wait();
+console.log("Transaction Complete!")
+await accessControls(outputHash,contracts)
+console.log(ct)
+}
+
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files
@@ -181,15 +211,51 @@ const deploy=async()=>{
   }
 
   return (
+    <>
     <div className="App">
-      <input type="file" onChange={handleFileChange} />
+     
+<div>
+        <input type="file" onChange={handleFileChange} />
+        </div>
 
-      <button onClick={uploadEncryptedFile} disabled={!file}>
-        UploadEncrypt
+<div>
+  
+{ready && !authenticated && (
+      <button disabled={disableLogin} onClick={login}>
+        Log in
       </button>
+    )}
+</div>
+     <button className='m-2 p-3 bg-red-500' onClick={uploadEncryptedFile}>uploadencrypt</button>
+     <button className='m-2 p-3 bg-red-500' onClick={uploadOnce}>tableuploadonce</button>
+     <button className='m-2 p-3 bg-red-500' onClick={sets}>sets</button>
+     
 
-      <button onClick={uploads}>UPLOADFUNC</button>
+fuck
+     {/* <button onClick={sets}>setcontroler</button> */}
+     <button className='m-2 p-3 bg-red-500' onClick={signAuthMessages}>signauthmessages</button>
+
+
+
+
       <div>
+        <div>
+        <form onSubmit={uploadData} className="space-y-4">
+        <div>
+          <label htmlFor="title" className="block font-medium text-gray-700">Title</label>
+          <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 p-2 w-full border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+        <div>
+          <label htmlFor="metadata" className="block font-medium text-gray-700">Metadata</label>
+          <input type="text" id="metadata" value={metadata} onChange={(e) => setMetadata(e.target.value)} className="mt-1 p-2 w-full border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+        <div>
+          <label htmlFor="price" className="block font-medium text-gray-700">Price</label>
+          <input type="number" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="mt-1 p-2 w-full border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+        <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">Submit</button>
+      </form>
+        </div>
 
       <button onClick={()=>decrypt()}>decrypt</button>
       {
@@ -198,12 +264,10 @@ const deploy=async()=>{
         :
           <div className='m-2'>not available</div>
       }
+
       </div>
- <div>
- {/* <button onClick={()=>accessControl()}>Accesscontrol</button> */}
- <button onClick={()=>deploy()}>deploy</button>
- </div>
     </div>
+    </>
   )
 }
 
