@@ -199,7 +199,7 @@ console.log(ct)
 <div>
   
 {ready && !authenticated && (
-      <button disabled={disableLogin} onClick={login}>
+      <button className='m-2 p-3 bg-blue-500 inline-block  hover:bg-violet-800 text-white font-bold py-2 px-4 rounded-lg shadow-md'disabled={disableLogin} onClick={login}>
         Log in
       </button>
     )}
@@ -224,17 +224,9 @@ console.log(ct)
           <label htmlFor="price" className="block font-medium text-gray-700">Price</label>
           <input type="number" id="price" value={price} onChange={(e) => setPrice(e.target.value)} className="mt-1 p-2 w-full border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
-        <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">Submit</button>
+        <button type="submit" className="w-fit bg-indigo-600 text-white py-2 rounded-md block  hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">Submit</button>
       </form>
         </div>
-{/* 
-      <button onClick={()=>decrypt()}>decrypt</button>
-      {
-        fileURL?
-          <a href={fileURL} target="_blank">viewFile</a>
-        :
-          <div className='m-2'>not available</div>
-      } */}
 
       </div>
     </div>

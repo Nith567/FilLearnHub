@@ -9,6 +9,7 @@ import { purchaseContract } from "@/utils/contract";
 import { ethers } from 'ethers';
 export default function Home({ params }) {
     const id = params.id;
+    const [fileType, setFileType] = useState("image/jpeg");
     const [apiData, setApiData] = useState([]);
     const {wallets} = useWallets();
     const [fileURL, setFileURL] = useState(null)
@@ -39,6 +40,10 @@ const initializeSigner=useCallback(async()=> {
   return providers.getSigner();
 },[wallets])
 
+const handleFileTypeChange = (event) => {
+  setFileType(event.target.value);
+};
+
 
 const aliceuser=useCallback(async()=>{
   const signer=await initializeSigner();
@@ -58,6 +63,7 @@ const purchase =async()=>{
 
   console.log( priceWei, apiData.price)
   const buyed= await purchaseContract(signer,apiData.contract,priceWei);
+  console.log("buyed , ",buyed)
 }
 
 
@@ -96,7 +102,7 @@ const signAuthMessages = async () => {
      }
 
  }
- const decrypts = async (cid) => {
+ const decrypts = async (cid,fileType) => {
   try {
   //   const cid = "QmWU6WqYHQKwzoh2VskyswPGLPCTWDhsakMgtn8jK46rDd";
     const { publicKey, signMessage } = await signAuthMessages();
@@ -107,7 +113,7 @@ const signAuthMessages = async () => {
     );
 
     // const fileType = "image/jpeg";
-    const fileType = "video/mp4";
+    // const fileType = "video/mp4";
     const decrypted = await lighthouse.decryptFile(
       cid,
       keyObject.data.key,
@@ -128,7 +134,7 @@ const signAuthMessages = async () => {
 
 return(
     <>
-         <div className="container mx-auto px-4 py-8">
+         {/* <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-4">Dataset Details</h1>
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6">
@@ -153,8 +159,65 @@ return(
         </div>
         <button  className='mt-1 text-md bg-orange-400 p-2'onClick={purchase}>purchase</button>
       </div>
+      <div>
+      <label htmlFor="fileType">Select File Type:</label>
+      <select
+        id="fileType"
+        value={fileType}
+        onChange={handleFileTypeChange}
+        className="block w-full mt-2 p-2 border border-gray-300 rounded-md"
+      >
+        <option value="image/jpeg">Image (JPEG)</option>
+        <option value="video/mp4">Video (MP4)</option>
+        <option value="text/csv">CSV</option>
+      </select>
+      <p className="mt-2">Selected FileType: {fileType}</p>
     </div>
-
+    </div> */}
+ <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-4">Dataset Details</h1>
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="px-4 py-5 sm:px-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900">Dataset Information</h3>
+          <p className="mt-1 max-w-2xl text-sm text-gray-500">Details of the dataset.</p>
+        </div>
+        <div className="border-t border-gray-200">
+          <dl>
+            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Title</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">{apiData.title}</dd>
+            </div>
+            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Owner</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">{apiData.owner}</dd>
+            </div>
+            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Price</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">{apiData.price}</dd>
+            </div>
+            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">About</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:col-span-2">{apiData.metadata}</dd>
+            </div>
+          </dl>
+        </div>
+        <button className='mt-4 text-md bg-orange-400 p-2' onClick={purchase}>Purchase</button>
+      </div>
+      <div className="mt-4">
+        <label htmlFor="fileType">Select File Type:</label>
+        <select
+          id="fileType"
+          value={fileType}
+          onChange={handleFileTypeChange}
+          className="block w-full mt-2 p-2 border border-gray-300 rounded-md"
+        >
+          <option value="image/jpeg">Image (JPEG)</option>
+          <option value="video/mp4">Video (MP4)</option>
+          <option value="text/csv">CSV</option>
+        </select>
+        <p className="mt-2">Selected FileType: {fileType}</p>
+      </div>
+    </div>
     {ready && !authenticated && (
       <button className=" inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg "disabled={disableLogin} onClick={login}>
         Log in
@@ -168,7 +231,7 @@ return(
       <li className="text-sm text-gray-600">Google: {user?.google ? user?.google.email : 'None'}</li>
       <li className="text-sm text-gray-600">Email: {user?.email ? user?.email.address : 'None'}</li>
     </ul>
-    <button className="mt-4 bg-orange-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-orange-700" onClick={() => decrypts(apiData.cid)}>Decrypt</button>
+    <button className="mt-4 bg-orange-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-orange-700" onClick={() => decrypts(apiData.cid,fileType)}>Decrypt</button>
     <div className="mt-4">
       {fileURL ?
         <a href={fileURL} target="_blank" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">View File</a>
