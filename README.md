@@ -10,7 +10,7 @@ The process of uploading data involves two steps, considering the Filecoin netwo
 
 ## Notes 📝
 
-- Please be patient during the data uploading process(involes two transactions), as the Filecoin network may exhibit slower speeds.
+- Please be patient during the data uploading process(involes two transactions, also to get into tableland data), as the Filecoin network may exhibit slower speeds.
 
 -> To decrypt the data need to purchase (interaction with smart contract),using decryption through lighthouseStorage token gating access control otherwise cannot get data, gives an error like this
 <img width="701" alt="Screenshot 2024-04-08 at 1 13 10 AM" src="https://github.com/Nith567/FilLearnHub/assets/91722732/1f85ec2c-4ad3-4a53-a804-6b56ecf9f5e5">
