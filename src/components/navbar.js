@@ -76,7 +76,7 @@ const Navbar = () => {
                     <li>
                         <Link href="/lists" className="flex flex-col items-center">
                             <PiHandCoinsDuotone className='text-2xl' />
-                            <span>Courses</span>
+                            <span>Data Market</span>
                         </Link>
                     </li>
                     <li>
@@ -97,7 +97,7 @@ const Navbar = () => {
                         <AiOutlineHome className="mr-2" /> Home
                     </Link>
                     <Link href="/lists" className="flex items-center">
-                        <PiHandCoinsDuotone className='text-2xl mr-2' /> Courses
+                        <PiHandCoinsDuotone className='text-2xl mr-2' /> Data Market
                     </Link>
                     <Link href="/create" className="flex items-center">
                         <HiOutlineBuildingLibrary className='text-2xl mr-2' /> Upload on FHB
