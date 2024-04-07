@@ -13,7 +13,6 @@ const imageUrl='https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1
     <div className="bg-white rounded-lg shadow-lg p-6 m-4">
     <h2 className="text-xl font-semibold">{title}</h2>
     <img src={imageUrl} alt={title} className="w-full rounded-lg mt-4" />
-    <p className="text-gray-600">Contract: {contract}</p>
     <p className="text-gray-600">ID: {id}</p>
     <div className="owner-container overflow-hidden h-12">
       <p className="text-gray-600">Owner: {owner}</p>
