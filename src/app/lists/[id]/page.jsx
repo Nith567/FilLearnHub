@@ -241,13 +241,15 @@ return(
       <li>Email: {user?.email ? user?.email.address : 'None'}</li>
       <button onClick={notify}>notify</button>
 
-      <button className='mt-1 text-md bg-orange-600 p-2'onClick={()=>decrypts(apiData.cid)}>decrypt</button>
+      <button className='mt-1 text-md bg-orange-600 p-2'onClick={()=>decrypts(apiData.cid)}>Decrypt</button>
+      <div className="m-2 ">
       {
         fileURL?
-          <a href={fileURL} target="_blank">viewFile</a>
+          <a href={fileURL} target="_blank" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">viewFile</a>
         :
           <div className='m-2'>not available</div>
       }
+      </div>
       </p>
 
 </div>

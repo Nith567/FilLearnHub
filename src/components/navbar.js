@@ -74,19 +74,13 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link href="/create" className="flex flex-col items-center">
-                            <CgProfile className="text-2xl" />
-                            <span>Create</span>
-                        </Link>
-                    </li>
-                    <li>
                         <Link href="/lists" className="flex flex-col items-center">
                             <PiHandCoinsDuotone className='text-2xl' />
                             <span>Courses</span>
                         </Link>
                     </li>
                     <li>
-                        <Link href="/" className="flex flex-col items-center">
+                        <Link href="/create" className="flex flex-col items-center">
                             <GiTeacher className='text-3xl' />
                             <span>Teach on FLB</span>
                         </Link>
@@ -102,10 +96,7 @@ const Navbar = () => {
                     <Link href="/" className="flex items-center">
                         <AiOutlineHome className="mr-2" /> Home
                     </Link>
-                    <Link href="/profile" className="flex items-center">
-                        <CgProfile className="text-2xl mr-2" /> Profile
-                    </Link>
-                    <Link href="/earn" className="flex items-center">
+                    <Link href="/lists" className="flex items-center">
                         <PiHandCoinsDuotone className='text-2xl mr-2' /> Courses
                     </Link>
                     <Link href="/create" className="flex items-center">
