@@ -17,6 +17,9 @@ const imageUrl='https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1
     <div className="owner-container overflow-hidden h-12">
       <p className="text-gray-600">Owner: {owner}</p>
     </div>
+    <div className="owner-container overflow-hidden h-12">
+      <p className="text-gray-600"> {metadata}</p>
+    </div>
     <p className="text-gray-600">Price: {price}</p>
     <button
       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
