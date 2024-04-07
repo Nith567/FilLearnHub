@@ -39,16 +39,6 @@ const initializeSigner=useCallback(async()=> {
   return providers.getSigner();
 },[wallets])
 
-const switchsepolia=useCallback(async()=> {
-  const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
-  if (!embeddedWallet) {
-    console.error('Embedded wallet not found');
-    return null;
-  }
-  await embeddedWallet.switchChain(11155111);
-  const providers = await embeddedWallet.getEthersProvider();
-  return providers.getSigner();
-},[wallets])
 
 const aliceuser=useCallback(async()=>{
   const signer=await initializeSigner();
@@ -60,84 +50,20 @@ const aliceuser=useCallback(async()=>{
  return userAlice;
 },[wallets])
 
- const notify=async()=>{
-  //  const signer=await initializeSigner();
-  //  if (!signer) return;
-const userAlice=await aliceuser();
-
-if(!userAlice)return null;
-
-  const aliceInfo = await userAlice.notification.list('INBOX');
-  console.log(aliceInfo)
-  
- }
-
-
 
 const purchase =async()=>{
   const signer=await initializeSigner();
-  console.log('puk ', apiData.price)
-  //  const buyed= await purchaseContract(signer,,apiData.price);
+  console.log(apiData.price)
   const priceWei = ethers.utils.parseEther(String(apiData.price)).toString();
 
-  console.log('puk ', priceWei, apiData.price)
-  const buyed= await purchaseContract(signer,"0xc0d3e466Db7F3d36d1E81F69f3bFBb3E43Dd4D6d",priceWei);
-
-  // const signers=await switchsepolia()
-  //  const userAlice = await PushAPI.initialize(signers, {
-  //   env: 'staging',
-  // });
-  // const aliceInfo = await userAlice.notification.list('INBOX');
-  // console.log(aliceInfo)
-
-  // const targetedNotif = await userAlice.channel.send(
-  //   ["*"],
-  //   {
-  //     notification: {
-  //       title: "Sucessfully bitch subscribed",
-  //       body: `By ${aliceInfo}`,
-  //     },
-  //   },
-  // );
+  console.log( priceWei, apiData.price)
+  const buyed= await purchaseContract(signer,apiData.contract,priceWei);
 }
 
 
 
 
-const sendnot=async()=>{
-  
-  try{
-    const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
-    if (!embeddedWallet) {
-      console.error('Embedded wallet not found');
-      return null;
-    }
-    await embeddedWallet.switchChain(11155111);
-    const providers = await embeddedWallet.getEthersProvider();
-    const signer=  providers.getSigner();
-    const userAlice = await PushAPI.initialize(signer, {
-      env: 'staging',
-    });
-    if(!userAlice)return null;
-    const sendNotifRes = await userAlice.channel.send(['0xDB8c1d498F18d4A55A7Ff7465402329F193D0E58'], {
-      notification: { title: 'fkkkk', body: 'fkkkkk' },
-    });
-    console.log("poop", sendNotifRes)
-//  await userAlice.channel.send(
-//     ['*'],
-//     {
-//       notification: {
-//         title: 'bitch subscribedalsdjf',
-//         body: `By`,
-//       },
-//     }
-//   )
 
-  }
-  catch(error){
-    console.error("Error:", error);
-  }
-}
 const signAuthMessages = async () => {
 
   const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
@@ -180,7 +106,8 @@ const signAuthMessages = async () => {
       signMessage
     );
 
-    const fileType = "image/jpeg";
+    // const fileType = "image/jpeg";
+    const fileType = "video/mp4";
     const decrypted = await lighthouse.decryptFile(
       cid,
       keyObject.data.key,
@@ -225,35 +152,32 @@ return(
           </dl>
         </div>
         <button  className='mt-1 text-md bg-orange-400 p-2'onClick={purchase}>purchase</button>
-        <button  className='mt-1 text-md bg-orange-600 p-2'onClick={sendnot}>notify</button>
       </div>
     </div>
 
     {ready && !authenticated && (
-      <button disabled={disableLogin} onClick={login}>
+      <button className=" inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg "disabled={disableLogin} onClick={login}>
         Log in
       </button>
     )}
     {ready && authenticated && (
-        <div>
-      <p>User {user?.id} is logged in. {user?.wallet?.address}
-      <li>Google: {user?.google ? user?.google.email : 'None'}</li>
-      <li>Email: {user?.email ? user?.email.address : 'None'}</li>
-      <button onClick={notify}>notify</button>
-
-      <button className='mt-1 text-md bg-orange-600 p-2'onClick={()=>decrypts(apiData.cid)}>Decrypt</button>
-      <div className="m-2 ">
-      {
-        fileURL?
-          <a href={fileURL} target="_blank" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">viewFile</a>
+  <div>
+    <p className="text-lg font-semibold">User {user?.id} is logged in.</p>
+    <p className="text-sm text-gray-600">Wallet Address: {user?.wallet?.address}</p>
+    <ul className="list-disc pl-6 mt-2">
+      <li className="text-sm text-gray-600">Google: {user?.google ? user?.google.email : 'None'}</li>
+      <li className="text-sm text-gray-600">Email: {user?.email ? user?.email.address : 'None'}</li>
+    </ul>
+    <button className="mt-4 bg-orange-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-orange-700" onClick={() => decrypts(apiData.cid)}>Decrypt</button>
+    <div className="mt-4">
+      {fileURL ?
+        <a href={fileURL} target="_blank" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">View File</a>
         :
-          <div className='m-2'>not available</div>
+        <div className="text-gray-600">Not Available</div>
       }
-      </div>
-      </p>
-
-</div>
-    )}
+    </div>
+  </div>
+)}
 
     </>
 )

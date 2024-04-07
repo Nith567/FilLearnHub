@@ -204,17 +204,10 @@ console.log(ct)
       </button>
     )}
 </div>
-     <button className='m-2 p-3 bg-red-500' onClick={uploadEncryptedFile}>uploadencrypt</button>
-     <button className='m-2 p-3 bg-red-500' onClick={uploadOnce}>tableuploadonce</button>
-     <button className='m-2 p-3 bg-red-500' onClick={sets}>sets</button>
-     
-
-fuck
+     <button className='m-2 p-3 bg-red-500 inline-block  hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md' onClick={uploadEncryptedFile}>uploadencrypt</button>
+     {/* <button className='m-2 p-3 bg-red-500' onClick={uploadOnce}>tableuploadonce</button> */}
+     {/* <button className='m-2 p-3 bg-red-500' onClick={sets}>sets</button> */}
      {/* <button onClick={sets}>setcontroler</button> */}
-     <button className='m-2 p-3 bg-red-500' onClick={signAuthMessages}>signauthmessages</button>
-
-
-
 
       <div>
         <div>
