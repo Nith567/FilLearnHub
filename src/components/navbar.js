@@ -31,7 +31,7 @@ const Navbar = () => {
                     <Link href="/">
                         <div className="flex items-center space-x-2">
                             <SiSololearn  className="h-16 w-16 text-white" />
-                            <span>FilHubLearn</span>
+                            <span>FilHub</span>
                         </div>
                     </Link>
                 </div>
