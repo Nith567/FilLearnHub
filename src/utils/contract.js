@@ -28,12 +28,3 @@ export async function purchaseContract(signer, contractAddress, price) {
     return {cid: result};
 }
 
-export const getMetadata = async (signer, address) => {
-    const contract = new ethers.Contract(
-        address,
-       Datacontract.abi,
-        signer
-    );
-    const result = await contract.getMetadata.call();
-    return result;
-}

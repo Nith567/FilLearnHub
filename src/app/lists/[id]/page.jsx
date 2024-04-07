@@ -1,5 +1,6 @@
 'use client'
 import { useCallback, useEffect,useState } from "react";
+import lighthouse, { upload } from "@lighthouse-web3/sdk"
 import { PushAPI } from '@pushprotocol/restapi';
 import axios from 'axios';
 import {usePrivy} from '@privy-io/react-auth';
@@ -10,7 +11,8 @@ export default function Home({ params }) {
     const id = params.id;
     const [apiData, setApiData] = useState([]);
     const {wallets} = useWallets();
-    const {ready, authenticated, login,user} = usePrivy();
+    const [fileURL, setFileURL] = useState(null)
+    const {ready, authenticated, login,user,signMessage} = usePrivy();
     const disableLogin = !ready || (ready && authenticated);
   
 useEffect(() => {
@@ -81,22 +83,22 @@ const purchase =async()=>{
   console.log('puk ', priceWei, apiData.price)
   const buyed= await purchaseContract(signer,"0xc0d3e466Db7F3d36d1E81F69f3bFBb3E43Dd4D6d",priceWei);
 
-  const signers=await switchsepolia()
-   const userAlice = await PushAPI.initialize(signers, {
-    env: 'staging',
-  });
-  const aliceInfo = await userAlice.notification.list('INBOX');
-  console.log(aliceInfo)
+  // const signers=await switchsepolia()
+  //  const userAlice = await PushAPI.initialize(signers, {
+  //   env: 'staging',
+  // });
+  // const aliceInfo = await userAlice.notification.list('INBOX');
+  // console.log(aliceInfo)
 
-  const targetedNotif = await userAlice.channel.send(
-    ["*"],
-    {
-      notification: {
-        title: "Sucessfully bitch subscribed",
-        body: `By ${aliceInfo}`,
-      },
-    },
-  );
+  // const targetedNotif = await userAlice.channel.send(
+  //   ["*"],
+  //   {
+  //     notification: {
+  //       title: "Sucessfully bitch subscribed",
+  //       body: `By ${aliceInfo}`,
+  //     },
+  //   },
+  // );
 }
 
 
@@ -136,6 +138,66 @@ const sendnot=async()=>{
     console.error("Error:", error);
   }
 }
+const signAuthMessages = async () => {
+
+  const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
+     try {
+       if (!embeddedWallet) {
+         console.error('Embedded wallet not found');
+         return null;
+       }
+       else{
+       await embeddedWallet.switchChain(314159);
+       const providers = await embeddedWallet.getEthersProvider();
+        const signerAddressS= providers.getSigner();
+        const signerAddress=await  signerAddressS.getAddress(); 
+       const {message}  = (await lighthouse.getAuthMessage(signerAddress)).data
+       console.log(message);
+
+       // const accounts = await wallet.provider.request({
+       //   method: 'eth_requestAccounts',
+       // });
+       const signatures = await signMessage(message)
+       return ({
+         publicKey:signerAddress,
+         signMessage:signatures
+       })
+     } 
+   }
+     catch (error) {
+       console.error("Error signing message with Wallet", error)
+       return null
+     }
+
+ }
+ const decrypts = async (cid) => {
+  try {
+  //   const cid = "QmWU6WqYHQKwzoh2VskyswPGLPCTWDhsakMgtn8jK46rDd";
+    const { publicKey, signMessage } = await signAuthMessages();
+    const keyObject = await lighthouse.fetchEncryptionKey(
+      cid,
+      publicKey,
+      signMessage
+    );
+
+    const fileType = "image/jpeg";
+    const decrypted = await lighthouse.decryptFile(
+      cid,
+      keyObject.data.key,
+      fileType
+    );
+    
+    console.log('decrypt bro', decrypted);
+    
+    const url = URL.createObjectURL(decrypted);
+    console.log(url);
+    
+    setFileURL(url);
+  } catch (error) {
+    console.error('Error during decryption:', error);
+  }
+};
+
 
 return(
     <>
@@ -178,6 +240,14 @@ return(
       <li>Google: {user?.google ? user?.google.email : 'None'}</li>
       <li>Email: {user?.email ? user?.email.address : 'None'}</li>
       <button onClick={notify}>notify</button>
+
+      <button className='mt-1 text-md bg-orange-600 p-2'onClick={()=>decrypts(apiData.cid)}>decrypt</button>
+      {
+        fileURL?
+          <a href={fileURL} target="_blank">viewFile</a>
+        :
+          <div className='m-2'>not available</div>
+      }
       </p>
 
 </div>

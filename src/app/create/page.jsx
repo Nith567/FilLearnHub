@@ -130,33 +130,10 @@ function page() {
       }
     }
 
-  // const decrypt = async (cid) => {
-  //   try {
-  //     const cid = "QmWU6WqYHQKwzoh2VskyswPGLPCTWDhsakMgtn8jK46rDd";//cid
-  //     const { publicKey, signedMessage } = await encryptionSignatures();
-  //     const keyObject = await lighthouse.fetchEncryptionKey(
-  //       cid,
-  //       publicKey,
-  //       signedMessage
-  //     );
+
+
+
   
-  //     const fileType = "image/jpeg";
-  //     const decrypted = await lighthouse.decryptFile(
-  //       cid,
-  //       keyObject.data.key,
-  //       fileType
-  //     );
-      
-  //     console.log('decrypt bro', decrypted);
-      
-  //     const url = URL.createObjectURL(decrypted);
-  //     console.log(url);
-      
-  //     setFileURL(url);
-  //   } catch (error) {
-  //     console.error('Error during decryption:', error);
-  //   }
-  // }
 
   const uploadOnce=async()=>{
     const signer=await initializeSigner();
@@ -199,6 +176,7 @@ const uploadData=async(e)=>{
 let ct= await insert.txn?.wait();
 console.log("Transaction Complete!")
 await accessControls(outputHash,contracts)
+
 console.log(ct)
 }
 
@@ -256,14 +234,14 @@ fuck
         <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">Submit</button>
       </form>
         </div>
-
+{/* 
       <button onClick={()=>decrypt()}>decrypt</button>
       {
         fileURL?
           <a href={fileURL} target="_blank">viewFile</a>
         :
           <div className='m-2'>not available</div>
-      }
+      } */}
 
       </div>
     </div>
